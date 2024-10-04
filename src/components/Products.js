@@ -11,7 +11,7 @@ function Products(props) {
           prodct.map((prod) => (
               <div className='col-md-4 mb-4'>
             <div class="card">
-            <img class="card-img-top" alt="" src={prod.image} style={{ height:'450px' }} />
+            <img class="card-img-top" alt="card image" src={prod.image} style={{ height:'450px' }} />
             <div class="card-body">
               <h5 class="card-title">{prod.name}</h5>
               <p class="card-text">Rs, {prod.price}</p>
