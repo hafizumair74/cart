@@ -40,6 +40,16 @@ This installs **FLauncher** instead of Projectivy and skips the heavy video scre
 
 If the TV asks to **allow debugging** from your laptop, choose **Allow** (and “Always allow” if offered).
 
+## Minimal Apple-TV-style UI (simple + beautiful)
+
+Too many icons (FLauncher TV + Mobile rows)? Use **Vibe Launcher**:
+
+```bash
+./minimal-apple-tv.sh 192.168.0.103
+```
+
+See [MINIMAL-UI.md](./MINIMAL-UI.md) and the Instagram-style dock setup there.
+
 ## Wisdom Share / WISDOM • SHARE home (your TV)
 
 If **Home** opens the colorful “Smart cloud TV” screen (not Projectivy):
