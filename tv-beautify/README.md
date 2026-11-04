@@ -40,6 +40,19 @@ This installs **FLauncher** instead of Projectivy and skips the heavy video scre
 
 If the TV asks to **allow debugging** from your laptop, choose **Allow** (and “Always allow” if offered).
 
+## Other launchers + remove old ones
+
+Compare options: [LAUNCHER-OPTIONS.md](./LAUNCHER-OPTIONS.md)
+
+```bash
+chmod +x launcher-manage.sh
+./launcher-manage.sh 192.168.0.103 list
+KEEP=vibe REMOVE_OLD=1 ./launcher-manage.sh 192.168.0.103
+INSTALL=couchy REMOVE_OLD=1 KEEP=couchy ./launcher-manage.sh 192.168.0.103
+```
+
+Removes **FLauncher / Projectivy / trials** only — **never** the stock Wisdom Share launcher.
+
 ## Minimal Apple-TV-style UI (simple + beautiful)
 
 Too many icons (FLauncher TV + Mobile rows)? Use **Vibe Launcher**:
