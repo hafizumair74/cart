@@ -35,6 +35,27 @@ If you prefer Projectivy:
 3. **Manage apps** → hide everything except 3–6 favorites
 4. **Appearance** → hide row titles, dark wallpaper from `/sdcard/Download/DevTV/`
 
+## Bigger tiles + “All apps” broken (Vibe)
+
+| Fix | Action |
+|-----|--------|
+| **Larger cards** | Vibe **Settings → General → Tiles per row → 4** |
+| **Full app list** | From the **dock**, press **Down** (not the grey “All apps” tile) |
+| **Hide broken tile** | Long-press **OK** on “All apps” → **Hide** |
+| **Permissions** | Run `./fix-vibe-and-system-ui.sh 192.168.0.103` |
+
+## Replace Media Center + blue System Setting
+
+Stock **Media Center** and **System Setting** are CVTE apps — they cannot be restyled, only **replaced**:
+
+```bash
+./fix-vibe-and-system-ui.sh 192.168.0.103
+# then optionally hide old apps:
+DISABLE_CVTE_UI=1 ./fix-vibe-and-system-ui.sh 192.168.0.103
+```
+
+Use **Material Files** (installed by script) instead of Media Center; use **Vibe → Settings** or Android Settings instead of the blue grid.
+
 ## What to avoid on 1GB Wisdom Share TV
 
 - Two full rows of “TV Apps” + “Mobile Apps” (current FLauncher look)
