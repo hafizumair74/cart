@@ -11,11 +11,32 @@ This folder installs a **fast, ad‑friendly home screen** on your TV from your 
 
 ## One-time setup on the TV (~2 minutes)
 
-1. **Settings → About** → tap **Build** (or **Version**) **7 times** → Developer mode on.
-2. **Settings → Developer options**:
-   - **USB debugging** → ON
-   - **Network debugging** / **Wireless debugging** → ON (wording varies)
-3. **Settings → Network → Wi‑Fi** → open the connected network → note **IP address** (e.g. `192.168.0.105`).
+### If you only see **System Info** (like `SMART_TV`, Android 12, 1GB RAM)
+
+Your TV **is** Android 12 — good. Developer mode is just hidden:
+
+1. Open **Settings → About → System Info** (the screen you photographed).
+2. Highlight **Firmware Version** (`20240109_…`) and press **OK on the remote 7 times quickly**.  
+   If nothing happens, try the same on **Android Version** (the row that says `12`).
+3. You should see **“You are now a developer”** (or similar). Go **Back** to the main **Settings** list.
+4. Open the new **Developer options** menu (often at the bottom of Settings, or under **System**).
+5. Turn **USB debugging** **ON**. If you see **Network debugging** / **Wireless debugging**, turn that **ON** too.
+6. Find the TV **IP address**: **Settings → Network** (or **Wi‑Fi**) → your connected network → **IP** (e.g. `192.168.0.105`).  
+   *(IP is not on the System Info page — use Network/Wi‑Fi.)*
+
+**1GB RAM tip:** use the lightweight launcher mode on the laptop:
+
+```bash
+LOW_RAM=1 ./beautify-tv.sh YOUR_TV_IP
+```
+
+This installs **FLauncher** instead of Projectivy and skips the heavy video screensaver so the UI stays smooth.
+
+### Standard Android TV path
+
+1. **Settings → About** → tap **Build** **7 times** → Developer mode on.
+2. **Settings → Developer options** → **USB debugging** ON (+ network debugging if shown).
+3. **Settings → Network → Wi‑Fi** → note **IP address**.
 
 If the TV asks to **allow debugging** from your laptop, choose **Allow** (and “Always allow” if offered).
 

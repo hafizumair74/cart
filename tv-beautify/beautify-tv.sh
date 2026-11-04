@@ -14,6 +14,14 @@ PROJECTIVY_SHA256="74e33af1e5e13831a69a0669d2b68b02150bf9df1ae1df437dc67e3f8d52c
 PROJECTIVY_PKG="com.spocky.projengmenu"
 PROJECTIVY_HOME="${PROJECTIVY_PKG}/com.spocky.projengmenu.ui.home.MainActivity"
 
+FLauncher_URL="https://github.com/osrosal/flauncher/releases/download/v2025.07.001/flauncher-armeabi-v7a-release.apk"
+FLauncher_PKG="me.efesser.flauncher"
+FLauncher_HOME="${FLauncher_PKG}/me.efesser.flauncher.MainActivity"
+
+# LOW_RAM=1 → FLauncher + no Aerial Views (better for 1GB TVs like generic SMART_TV)
+LOW_RAM="${LOW_RAM:-0}"
+LAUNCHER="${LAUNCHER:-projectivy}"
+
 AERIAL_VERSION="1.8.5"
 AERIAL_URL="https://github.com/theothernt/AerialViews/releases/download/${AERIAL_VERSION}/aerial-views-${AERIAL_VERSION}.apk"
 AERIAL_PKG="com.neilturner.aerialviews"
@@ -150,32 +158,64 @@ save_backup() {
   ok "Saved backup info to ${out}"
 }
 
-install_apks() {
-  local projectivy_apk="${APK_DIR}/ProjectivyLauncher.apk"
-  local aerial_apk="${APK_DIR}/aerial-views.apk"
-  download_apk "$PROJECTIVY_URL" "$projectivy_apk" "$PROJECTIVY_SHA256"
-  download_apk "$AERIAL_URL" "$aerial_apk"
-
-  info "Installing Projectivy Launcher (modern TV home screen) ..."
-  "${ADB[@]}" install -r "$projectivy_apk" | tail -1
-  ok "Projectivy installed"
-
-  info "Installing Aerial Views (Apple TV–style screensaver) ..."
-  "${ADB[@]}" install -r "$aerial_apk" | tail -1
-  ok "Aerial Views installed"
+pick_launcher() {
+  if [[ "$LOW_RAM" == "1" ]]; then
+    LAUNCHER="flauncher"
+    warn "LOW_RAM=1: using FLauncher (recommended for 1GB SMART_TV boxes)"
+  fi
+  case "$LAUNCHER" in
+    projectivy)
+      LAUNCHER_PKG="$PROJECTIVY_PKG"
+      LAUNCHER_HOME="$PROJECTIVY_HOME"
+      LAUNCHER_LABEL="Projectivy"
+      ;;
+    flauncher)
+      LAUNCHER_PKG="$FLauncher_PKG"
+      LAUNCHER_HOME="$FLauncher_HOME"
+      LAUNCHER_LABEL="FLauncher"
+      ;;
+    *) fail "Unknown LAUNCHER=$LAUNCHER (use projectivy or flauncher)" ;;
+  esac
 }
 
-set_projectivy_default() {
-  info "Setting Projectivy as default Home ..."
-  adb_shell cmd package set-home-activity --user 0 "$PROJECTIVY_HOME" \
-    || adb_shell cmd package set-home-activity "$PROJECTIVY_HOME" \
+install_apks() {
+  pick_launcher
+  if [[ "$LAUNCHER" == "projectivy" ]]; then
+    local projectivy_apk="${APK_DIR}/ProjectivyLauncher.apk"
+    download_apk "$PROJECTIVY_URL" "$projectivy_apk" "$PROJECTIVY_SHA256"
+    info "Installing Projectivy Launcher ..."
+    "${ADB[@]}" install -r "$projectivy_apk" | tail -1
+    ok "Projectivy installed"
+  else
+    local fl_apk="${APK_DIR}/flauncher.apk"
+    download_apk "$FLauncher_URL" "$fl_apk"
+    info "Installing FLauncher (lightweight home screen) ..."
+    "${ADB[@]}" install -r "$fl_apk" | tail -1
+    ok "FLauncher installed"
+  fi
+
+  if [[ "$LOW_RAM" != "1" ]]; then
+    local aerial_apk="${APK_DIR}/aerial-views.apk"
+    download_apk "$AERIAL_URL" "$aerial_apk"
+    info "Installing Aerial Views (screensaver) ..."
+    "${ADB[@]}" install -r "$aerial_apk" | tail -1
+    ok "Aerial Views installed"
+  else
+    warn "Skipping Aerial Views on LOW_RAM=1 (saves RAM on 1GB TVs)"
+  fi
+}
+
+set_launcher_default() {
+  info "Setting ${LAUNCHER_LABEL} as default Home ..."
+  adb_shell cmd package set-home-activity --user 0 "$LAUNCHER_HOME" \
+    || adb_shell cmd package set-home-activity "$LAUNCHER_HOME" \
     || fail "Could not set default launcher (TV may block custom Home apps)"
 
-  adb_shell appops set "$PROJECTIVY_PKG" APP_AUTO_START allow 2>/dev/null || true
-  adb_shell appops set "$PROJECTIVY_PKG" AUTO_START allow 2>/dev/null || true
-  adb_shell dumpsys deviceidle whitelist "+${PROJECTIVY_PKG}" 2>/dev/null || true
+  adb_shell appops set "$LAUNCHER_PKG" APP_AUTO_START allow 2>/dev/null || true
+  adb_shell appops set "$LAUNCHER_PKG" AUTO_START allow 2>/dev/null || true
+  adb_shell dumpsys deviceidle whitelist "+${LAUNCHER_PKG}" 2>/dev/null || true
 
-  ok "Projectivy set as default Home (reboot TV if Home still opens the old UI)"
+  ok "${LAUNCHER_LABEL} set as default Home (reboot TV if Home still opens the old UI)"
 }
 
 disable_stock_launcher() {
@@ -185,7 +225,7 @@ disable_stock_launcher() {
   resolved="$(adb_shell cmd package resolve-activity --brief android.intent.category.HOME android.intent.action.MAIN 2>/dev/null | tail -1 | tr -d '\r')"
   local old_pkg="${resolved%%/*}"
 
-  if [[ -z "$old_pkg" || "$old_pkg" == "$PROJECTIVY_PKG" ]]; then
+  if [[ -z "$old_pkg" || "$old_pkg" == "$LAUNCHER_PKG" ]]; then
     info "Stock launcher already replaced or not detected"
     return 0
   fi
@@ -208,6 +248,7 @@ disable_stock_launcher() {
 }
 
 configure_screensaver() {
+  [[ "$LOW_RAM" != "1" ]] || return 0
   info "Setting Aerial Views as screensaver ..."
   adb_shell settings put secure screensaver_enabled 1 2>/dev/null || true
   adb_shell settings put secure screensaver_components "$AERIAL_DREAM" 2>/dev/null || true
@@ -226,15 +267,12 @@ ${GREEN}════════════════════════
 ${GREEN}  On the TV remote — finish these for the best look:${NC}
 ${GREEN}════════════════════════════════════════════════════════════${NC}
 
-  1. Press ${CYAN}Home${NC} → Projectivy should open.
-  2. Projectivy ${CYAN}Settings${NC} (gear):
-     • Hide apps you do not use
-     • Wallpaper → pick a source (built-in art looks great)
-     • Categories → reorder apps / use a clean grid
-  3. If Home still shows the old UI:
-     • Projectivy → Settings → enable ${CYAN}Accessibility${NC} service when offered
-     • Reboot the TV once
-  4. Open ${CYAN}Aerial Views${NC} once → pick video sources → set as screensaver if prompted
+  1. Press ${CYAN}Home${NC} → ${LAUNCHER_LABEL} should open.
+  2. Launcher settings:
+     • Hide / reorder apps you do not use
+     • Set a wallpaper (FLauncher: pick image from USB or file app)
+  3. If Home still shows the old UI → reboot once; on Projectivy enable ${CYAN}Accessibility${NC} if offered
+  4. If you installed Aerial Views → open it once and pick video sources
 
 ${YELLOW}Undo old launcher disable:${NC}
   adb shell pm enable com.example.oldlauncher
@@ -262,7 +300,7 @@ main() {
   connect_tv "$tv_ip"
   save_backup
   install_apks
-  set_projectivy_default
+  set_launcher_default
   disable_stock_launcher
   configure_screensaver
   launch_projectivy
