@@ -40,6 +40,20 @@ This installs **FLauncher** instead of Projectivy and skips the heavy video scre
 
 If the TV asks to **allow debugging** from your laptop, choose **Allow** (and “Always allow” if offered).
 
+## Developer look (after basic install)
+
+If FLauncher feels too plain and you want a **polished, dev-desk** home screen:
+
+```bash
+cd ~/tv-beautify
+curl -fsSL -o developer-tv.sh \
+  "https://raw.githubusercontent.com/hafizumair74/cart/cursor/tv-beautify-launcher-8673/tv-beautify/developer-tv.sh"
+chmod +x developer-tv.sh
+./developer-tv.sh 192.168.0.103
+```
+
+This installs **Projectivy**, sets it as Home, disables the old launcher, and copies dark code-themed wallpapers to the TV.
+
 ## Run on your laptop
 
 ### Linux / macOS

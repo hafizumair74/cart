@@ -222,10 +222,10 @@ disable_stock_launcher() {
   [[ "$DISABLE_OLD_LAUNCHER" == "1" ]] || return 0
 
   local resolved
-  resolved="$(adb_shell cmd package resolve-activity --brief android.intent.category.HOME android.intent.action.MAIN 2>/dev/null | tail -1 | tr -d '\r')"
+  resolved="$(adb_shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -1 | tr -d '\r')"
   local old_pkg="${resolved%%/*}"
 
-  if [[ -z "$old_pkg" || "$old_pkg" == "$LAUNCHER_PKG" ]]; then
+  if [[ -z "$old_pkg" || "$old_pkg" == "$LAUNCHER_PKG" || "$old_pkg" == *"No activity"* ]]; then
     info "Stock launcher already replaced or not detected"
     return 0
   fi
