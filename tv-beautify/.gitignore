@@ -1,0 +1,11 @@
+apks/
+!apks/.gitkeep
+wallpapers/
+platform-tools/
+.android-sdk/
+devdock-launcher/.gradle/
+devdock-launcher/app/build/
+devdock-launcher/build/
+devdock-launcher/local.properties
+*.log
+.backup/
