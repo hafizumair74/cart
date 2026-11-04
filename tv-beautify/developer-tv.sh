@@ -16,6 +16,8 @@ PROJECTIVY_PKG="com.spocky.projengmenu"
 PROJECTIVY_HOME="${PROJECTIVY_PKG}/com.spocky.projengmenu.ui.home.MainActivity"
 
 ADB_PORT="${ADB_PORT:-5555}"
+# Disabling stock launchers breaks Home on many SK529 / SMART_TV boxes — leave OFF.
+DISABLE_STOCK_LAUNCHER="${DISABLE_STOCK_LAUNCHER:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -198,7 +200,11 @@ main() {
   connect_tv "$ip"
   install_projectivy
   set_projectivy_home
-  disable_other_home_apps
+  if [[ "$DISABLE_STOCK_LAUNCHER" == "1" ]]; then
+    disable_other_home_apps
+  else
+    warn "Keeping stock launcher enabled (safe). Use Projectivy Accessibility override on TV if Home opens old UI."
+  fi
   push_dev_wallpapers
   tune_system_ui
   open_projectivy_home
