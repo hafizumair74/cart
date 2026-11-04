@@ -1,5 +1,20 @@
 # DevDock — your own TV launcher
 
+**Want maximum polish without coding?** Use [CleanYourTV](https://github.com/Gathin23/cleanyourtv) on your laptop:
+
+```bash
+git clone --depth 1 https://github.com/Gathin23/cleanyourtv.git ~/cleanyourtv
+cd ~/tv-beautify && chmod +x best-wisdom-tv.sh
+sudo apt install -y openjdk-17-jdk   # once
+./best-wisdom-tv.sh
+```
+
+Uses Sankey CVTE debloat + their `com.gathin.tvhome` launcher (`STOCK_LAUNCHER=none` so Wisdom boot stays safe).
+
+---
+
+# DevDock — your own TV launcher
+
 **DevDock** is a custom Android TV home screen built for your TV:
 
 - Large glass-style app tiles on a **random wallpaper** from `/sdcard/Download/DevTV/walls/`
