@@ -13,8 +13,33 @@ if [[ ! -f "$APK" ]]; then
   "${SCRIPT_DIR}/build-devdock.sh"
 fi
 
-if [[ -x "${SCRIPT_DIR}/platform-tools/adb" ]]; then ADB=("${SCRIPT_DIR}/platform-tools/adb")
-else ADB=(adb); fi
+TOOLS_DIR="${SCRIPT_DIR}/platform-tools"
+ensure_adb() {
+  if [[ -x "${TOOLS_DIR}/adb" ]]; then
+    ADB=("${TOOLS_DIR}/adb")
+    return 0
+  fi
+  if command -v adb >/dev/null 2>&1; then
+    ADB=(adb)
+    return 0
+  fi
+  echo "→ Installing Android platform-tools (one-time) ..."
+  mkdir -p "$TOOLS_DIR"
+  local zip="/tmp/platform-tools.zip"
+  local url="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+  case "$(uname -s)" in
+    Darwin) url="https://dl.google.com/android/repository/platform-tools-latest-darwin.zip" ;;
+    MINGW*|MSYS*|CYGWIN*) url="https://dl.google.com/android/repository/platform-tools-latest-windows.zip" ;;
+  esac
+  curl -fsSL -o "$zip" "$url"
+  unzip -qo "$zip" -d /tmp
+  rm -rf "$TOOLS_DIR"
+  mv /tmp/platform-tools "$TOOLS_DIR"
+  rm -f "$zip"
+  ADB=("${TOOLS_DIR}/adb")
+}
+
+ensure_adb
 
 # Wallpapers for DevDock (same pack as curated home)
 WALL_DIR="${SCRIPT_DIR}/wallpapers/curated"
