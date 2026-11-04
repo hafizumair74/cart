@@ -90,31 +90,48 @@ set_projectivy_home() {
   ok "Projectivy is now default Home"
 }
 
+disable_package_if_launcher() {
+  local pkg="$1"
+  [[ "$pkg" == "$PROJECTIVY_PKG" ]] && return 0
+  case "$pkg" in
+    com.android.settings|com.android.systemui|com.google.android.gms|android) return 0 ;;
+  esac
+  info "Disabling launcher package: ${pkg}"
+  if adb_shell pm disable-user --user 0 "$pkg" 2>/dev/null; then
+    echo "$pkg" >>"${BACKUP_DIR}/disabled-packages.txt"
+    ok "Disabled ${pkg}"
+  else
+    warn "Could not disable ${pkg}"
+  fi
+}
+
 disable_other_home_apps() {
   mkdir -p "$BACKUP_DIR"
   info "Finding stock launchers to disable (keeps Projectivy only) ..."
-  local list
-  list="$(adb_shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tr -d '\r' || true)"
-  if [[ -z "$list" ]]; then
-    list="$(adb_shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tr -d '\r' || true)"
+  local raw components pkg
+  raw="$(adb_shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tr -d '\r' || true)"
+  components="$(echo "$raw" | grep -oE 'com\.[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+' | sort -u || true)"
+
+  if [[ -z "$components" ]]; then
+    raw="$(adb_shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tr -d '\r' || true)"
+    components="$(echo "$raw" | grep -oE 'com\.[A-Za-z0-9_.]+/[A-Za-z0-9_.$]+' | sort -u || true)"
   fi
 
-  while IFS= read -r line; do
-    [[ -z "$line" ]] && continue
-    [[ "$line" == *"No activity found"* ]] && continue
-    local pkg="${line%%/*}"
-    [[ "$pkg" == "$PROJECTIVY_PKG" ]] && continue
-    case "$pkg" in
-      com.android.settings|com.android.systemui|com.google.android.gms) continue ;;
-    esac
-    info "Disabling launcher package: ${pkg}"
-    if adb_shell pm disable-user --user 0 "$pkg" 2>/dev/null; then
-      echo "$pkg" >>"${BACKUP_DIR}/disabled-packages.txt"
-      ok "Disabled ${pkg}"
-    else
-      warn "Could not disable ${pkg}"
-    fi
-  done <<< "$list"
+  if [[ -n "$components" ]]; then
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      pkg="${line%%/*}"
+      disable_package_if_launcher "$pkg"
+    done <<< "$components"
+  else
+    warn "Could not list HOME activities; trying package name scan ..."
+    local pkgs
+    pkgs="$(adb_shell pm list packages 2>/dev/null | grep -iE 'launcher|home|tvlauncher|leanback' | cut -d: -f2 | tr -d '\r' || true)"
+    while IFS= read -r pkg; do
+      [[ -z "$pkg" ]] && continue
+      disable_package_if_launcher "$pkg"
+    done <<< "$pkgs"
+  fi
 }
 
 push_dev_wallpapers() {
@@ -124,15 +141,17 @@ push_dev_wallpapers() {
 
   # Dark, dev-aesthetic stills (1920-wide, static = best on 1GB RAM)
   declare -A WALLS=(
-    ["wall-code-dark.jpg"]="https://images.unsplash.com/photo-1517694712202-14dd9538aa7f?auto=format&w=1920&q=80"
-    ["wall-terminal.jpg"]="https://images.unsplash.com/photo-1555068935-fa187a1d4f0e?auto=format&w=1920&q=80"
-    ["wall-matrix-green.jpg"]="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&w=1920&q=80"
+    ["wall-code-dark.jpg"]="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1920&q=80"
+    ["wall-terminal.jpg"]="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1920&q=80"
+    ["wall-matrix-green.jpg"]="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=1920&q=80"
+    ["wall-space-tech.jpg"]="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80"
   )
 
   info "Copying developer wallpapers to TV (${remote}) ..."
   for name in "${!WALLS[@]}"; do
     local path="${WALL_DIR}/${name}"
-    if [[ ! -f "$path" ]]; then
+    if [[ ! -f "$path" ]] || ! file "$path" 2>/dev/null | grep -qi jpeg; then
+      rm -f "$path"
       curl -fsSL -o "$path" "${WALLS[$name]}" || warn "Skip download $name"
     fi
     [[ -f "$path" ]] && "${ADB[@]}" push "$path" "${remote}/${name}" >/dev/null && ok "Pushed ${name}"
@@ -158,6 +177,7 @@ print_finish() {
   echo -e "  1. Press ${CYAN}Home${NC} → ${BOLD}Projectivy${NC} should open (not the old store UI)."
   echo -e "  2. Projectivy ${CYAN}Settings${NC} (gear):"
   echo "       • Wallpaper → Local file → /sdcard/Download/DevTV/wall-code-dark.jpg"
+  echo "         (also: wall-terminal.jpg, wall-matrix-green.jpg, wall-space-tech.jpg)"
   echo "       • Card style → smaller / transparent cards (cleaner)"
   echo "       • Categories → Dev · Media · System — hide App Store junk"
   echo "       • Turn OFF animated/video wallpaper (1GB RAM stays fast)"
