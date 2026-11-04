@@ -1,0 +1,4 @@
+apks/
+platform-tools/
+*.log
+.backup/
