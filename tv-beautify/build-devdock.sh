@@ -39,6 +39,12 @@ fi
 ensure_sdk
 ./gradlew assembleRelease -q
 mkdir -p "$(dirname "$APK_OUT")"
-cp -f app/build/outputs/apk/release/app-release-unsigned.apk "$APK_OUT" 2>/dev/null \
-  || cp -f app/build/outputs/apk/release/app-release.apk "$APK_OUT"
+RELEASE_APK="app/build/outputs/apk/release/app-release.apk"
+if [[ -f "$RELEASE_APK" ]] && unzip -l "$RELEASE_APK" 2>/dev/null | grep -qE 'META-INF/.*\.(RSA|DSA|EC)'; then
+  cp -f "$RELEASE_APK" "$APK_OUT"
+else
+  echo "→ Building signed debug APK (for adb install) ..."
+  ./gradlew assembleDebug -q
+  cp -f app/build/outputs/apk/debug/app-debug.apk "$APK_OUT"
+fi
 echo "✓ Built $APK_OUT"

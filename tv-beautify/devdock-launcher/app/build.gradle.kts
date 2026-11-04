@@ -17,6 +17,8 @@ android {
 
     buildTypes {
         release {
+            // Sideload-friendly: sign with debug key so `adb install` works without a release keystore
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
