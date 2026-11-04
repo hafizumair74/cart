@@ -40,6 +40,18 @@ This installs **FLauncher** instead of Projectivy and skips the heavy video scre
 
 If the TV asks to **allow debugging** from your laptop, choose **Allow** (and “Always allow” if offered).
 
+## Wisdom Share / WISDOM • SHARE home (your TV)
+
+If **Home** opens the colorful “Smart cloud TV” screen (not Projectivy):
+
+```bash
+./wisdom-share-fix.sh 192.168.0.103
+```
+
+**Do not** disable `com.cvte.tv.launcher.space` — boot can hang on the Wisdom animation.
+
+**Startup video:** Removing the power-on Wisdom clip usually needs **root** or a **factory hidden menu** (try Menu → **1147** while in Settings). ADB alone rarely removes it.
+
 ## Developer look (after basic install)
 
 If FLauncher feels too plain and you want a **polished, dev-desk** home screen:

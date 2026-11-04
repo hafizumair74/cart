@@ -8,7 +8,9 @@ After **fix-tv-home.sh**, Home works and Projectivy is default. Polish the look 
 ./fix-tv-home.sh 192.168.0.103
 ```
 
-Never disable the stock launcher on this board — use Projectivy **Accessibility** instead.
+Never disable **com.cvte.tv.launcher.space** (Wisdom Share) — TVs can **stick on the boot animation**. Use Projectivy **Accessibility** to override Home instead.
+
+Run: `./wisdom-share-fix.sh 192.168.0.103`
 
 ## 2. Projectivy — developer preset
 
