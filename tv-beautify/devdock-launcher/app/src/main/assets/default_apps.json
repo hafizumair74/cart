@@ -1,0 +1,19 @@
+[
+  {"label": "YouTube", "package": "com.google.android.youtube.tv"},
+  {"label": "YouTube", "package": "com.google.android.youtube.tvmusic"},
+  {"label": "Netflix", "package": "com.netflix.ninja"},
+  {"label": "Prime Video", "package": "com.amazon.amazonvideo.livingroom"},
+  {"label": "Disney+", "package": "com.disney.disneyplus"},
+  {"label": "VLC", "package": "org.videolan.vlc"},
+  {"label": "AirScreen", "package": "com.inair.app.airscreen"},
+  {"label": "Browser", "package": "com.opera.browser"},
+  {"label": "Browser", "package": "com.android.chrome"},
+  {"label": "Files", "package": "me.zhanghai.android.files"},
+  {"label": "Play Store", "package": "com.android.vending"},
+  {"label": "Settings", "package": "com.android.tv.settings"},
+  {"label": "Settings", "package": "com.android.settings"},
+  {"label": "Kindlink", "package": "com.kindlink"},
+  {"label": "VPN", "package": "com.freevpn"},
+  {"label": "Tamasha", "package": "tamasha"},
+  {"label": "Dunya News", "package": "dunya"}
+]
