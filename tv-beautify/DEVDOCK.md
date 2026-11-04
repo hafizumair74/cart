@@ -11,14 +11,32 @@ Source: `devdock-launcher/` (Kotlin).
 
 ## Install on TV (from laptop)
 
-```bash
-cd ~/tv-beautify
-git pull   # or curl scripts from GitHub
+**Option A — scripts only (no git):**
 
-chmod +x build-devdock.sh install-devdock.sh
-./build-devdock.sh          # first time: downloads Android SDK + builds APK (~5 min)
+```bash
+mkdir -p ~/tv-beautify && cd ~/tv-beautify
+curl -fsSL -o fetch-devdock-source.sh \
+  "https://raw.githubusercontent.com/hafizumair74/cart/cursor/tv-beautify-launcher-8673/tv-beautify/fetch-devdock-source.sh"
+curl -fsSL -o build-devdock.sh \
+  "https://raw.githubusercontent.com/hafizumair74/cart/cursor/tv-beautify-launcher-8673/tv-beautify/build-devdock.sh"
+curl -fsSL -o install-devdock.sh \
+  "https://raw.githubusercontent.com/hafizumair74/cart/cursor/tv-beautify-launcher-8673/tv-beautify/install-devdock.sh"
+chmod +x fetch-devdock-source.sh build-devdock.sh install-devdock.sh
+./fetch-devdock-source.sh    # downloads devdock-launcher/ folder
+./build-devdock.sh           # SDK + APK (~5 min first time)
 ./install-devdock.sh 192.168.0.103
 ```
+
+**Option B — full git clone:**
+
+```bash
+git clone --branch cursor/tv-beautify-launcher-8673 --depth 1 \
+  https://github.com/hafizumair74/cart.git ~/cart-tv
+cd ~/cart-tv/tv-beautify && chmod +x build-devdock.sh install-devdock.sh
+./build-devdock.sh && ./install-devdock.sh 192.168.0.103
+```
+
+`build-devdock.sh` will auto-run `fetch-devdock-source.sh` if `devdock-launcher/` is missing.
 
 Press **Home** → select **DevDock**.
 

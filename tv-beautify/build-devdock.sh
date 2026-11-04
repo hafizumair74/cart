@@ -10,6 +10,11 @@ APK_OUT="${SCRIPT_DIR}/apks/DevDock-launcher.apk"
 export ANDROID_HOME="$SDK_ROOT"
 export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$SDK_ROOT/platform-tools:$PATH"
 
+if [[ ! -f "${PROJECT}/app/build.gradle.kts" ]]; then
+  echo "→ devdock-launcher/ missing — fetching source ..."
+  "${SCRIPT_DIR}/fetch-devdock-source.sh"
+fi
+
 ensure_sdk() {
   if [[ -x "$SDK_ROOT/platform-tools/adb" ]] && [[ -d "$SDK_ROOT/platforms/android-35" ]]; then
     return 0
@@ -26,14 +31,9 @@ ensure_sdk() {
 }
 
 cd "$PROJECT"
-if [[ ! -f gradlew ]]; then
-  echo "→ Gradle wrapper ..."
-  if command -v gradle >/dev/null 2>&1; then
-    gradle wrapper --gradle-version 8.9
-  else
-    curl -fsSL -o gradlew "https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradlew"
-    chmod +x gradlew
-  fi
+if [[ ! -x ./gradlew ]]; then
+  echo "✗ gradlew missing — re-run fetch-devdock-source.sh" >&2
+  exit 1
 fi
 
 ensure_sdk
